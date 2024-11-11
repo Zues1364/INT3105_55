@@ -1,7 +1,8 @@
-const express = require('express');
-const lib = require('../utils'); // Tệp utils.js chứa các hàm giúp rút gọn URL và lưu vào cơ sở dữ liệu
+import express from 'express';
+import { setAsync } from './cache.js';
+import lib from '../utils.js';
 const app = express();
-const port = 3001; // Chọn port riêng cho dịch vụ này
+const port = 3001;
 
 app.use(express.json());
 app.use(rateLimit)
@@ -13,6 +14,12 @@ app.post('/shorten',  async (req, res) => {
             return res.status(400).send({ error: 'URL is required' });
         }
         const newID = await lib.shortUrl(url);
+        
+        try {
+            const result = await setAsync(newID, url, 'EX', 3600);
+        } catch (redisErr) {
+            return res.status(500).send({ error: 'Failed to save URL in Redis' });
+        }
         res.status(201).send({ shortID: newID });
     } catch (err) {
         res.status(500).send({ error: err.message });
