@@ -4,8 +4,9 @@ const app = express();
 const port = 3001; // Chọn port riêng cho dịch vụ này
 
 app.use(express.json());
+app.use(rateLimit)
 
-app.post('/shorten', async (req, res) => {
+app.post('/shorten',  async (req, res) => {
     try {
         const url = req.body.url;
         if (!url) {

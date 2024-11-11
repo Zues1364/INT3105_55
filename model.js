@@ -3,8 +3,24 @@ const { Sequelize, DataTypes } = require('sequelize');
 // Khởi tạo Sequelize với SQLite
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: '../db/app.db'
+    storage: '../db/app.db',
+    pool : {
+        max: 10, // Tối ưu nhất khi thử từ 5 - 100
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+    },
+    logging: console.log
 });
+
+sequelize.sync({ force: true })
+    .then(() => {
+        console.log("Database synchronized (reset).");
+    })
+    .catch(error => {
+        console.error("Failed to synchronize database:", error);
+    });
+
 
 // Định nghĩa mô hình cho URL
 const Url = sequelize.define('Url', {
