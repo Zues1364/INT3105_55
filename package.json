@@ -14,5 +14,6 @@
     "express-rate-limit": "^7.4.1",
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7"
-  }
+  },
+  "type": "module"
 }

@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
+import { Sequelize, DataTypes } from 'sequelize';
 
 // Khởi tạo Sequelize với SQLite
 const sequelize = new Sequelize({
@@ -40,7 +40,7 @@ const Url = sequelize.define('Url', {
 // Tạo bảng nếu chưa tồn tại
 sequelize.sync();
 
-module.exports = {
+export {
     Url,
     sequelize
 };

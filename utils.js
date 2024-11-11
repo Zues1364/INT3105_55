@@ -1,4 +1,4 @@
-const { Url } = require('./model');
+import { Url } from './model.js';
 
 function makeID(length) {
     let result = '';
@@ -41,7 +41,7 @@ async function shortUrl(url) {
     }
 }
 
-module.exports = {
+export {
     findOrigin,
     shortUrl
 };

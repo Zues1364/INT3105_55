@@ -1,6 +1,6 @@
 import express from 'express';
 import { getAsync, setAsync } from './cache.js';
-import lib from '../utils.js';
+import * as lib from '../utils.js';
 const app = express();
 const port = 3002;
 

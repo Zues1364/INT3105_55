@@ -1,11 +1,10 @@
 import express from 'express';
 import { setAsync } from './cache.js';
-import lib from '../utils.js';
+import * as lib from '../utils.js';
 const app = express();
 const port = 3001;
 
 app.use(express.json());
-app.use(rateLimit)
 
 app.post('/shorten',  async (req, res) => {
     try {
