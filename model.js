@@ -5,7 +5,7 @@ const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: '../db/app.db',
     pool : {
-        max: 10, // Tối ưu nhất khi thử từ 5 - 100
+        max: 5, // Tối ưu nhất khi thử từ 5 - 100
         min: 0,
         acquire: 30000,
         idle: 10000

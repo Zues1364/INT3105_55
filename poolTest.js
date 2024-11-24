@@ -1,4 +1,4 @@
-const { sequelize, Url } = require('./model'); // Import sequelize và model Url từ model.js
+import { sequelize, Url } from './model.js'; // Import sequelize và model Url từ model.js
 
 async function testConnectionPool() {
     await sequelize.sync({ force: true }); // Đồng bộ cơ sở dữ liệu
