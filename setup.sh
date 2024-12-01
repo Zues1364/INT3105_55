@@ -28,11 +28,17 @@ npm -v
 echo "Installing Redis..."
 sudo apt update
 sudo apt install -y redis-server
+# Set vm.overcommit_memory
+echo "Configuring Redis..."
+echo "vm.overcommit_memory=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
 redis-server --daemonize yes
 redis-cli ping
 
 # 3. Install MongoDB
 echo "Installing MongoDB..."
+sudo mkdir -p /var/lib/mongodb /var/log/mongodb
+sudo chown -R mongodb:mongodb /var/lib/mongodb /var/log/mongodb
 wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 sudo apt update
@@ -47,8 +53,6 @@ sudo apt install -y software-properties-common
 sudo add-apt-repository -y "ppa:openresty/ppa"
 sudo apt update
 sudo apt install -y openresty
-sudo /usr/local/openresty/bin/openresty -s stop
-sudo /usr/local/openresty/bin/openresty
 
 # 5. Configure OpenResty (NGINX)
 echo "Configuring OpenResty..."
@@ -71,7 +75,7 @@ http {
             local servers = { "localhost:3001", "localhost:3002" }
             local index = math.random(#servers)
             local server = servers[index]
-            ngx.ctx.upstream = server  -- Store the selected server in the context
+            ngx.ctx.upstream = server
             balancer.set_current_peer(server)
         }
     }
@@ -85,7 +89,7 @@ http {
             local servers = { "localhost:4001", "localhost:4002" }
             local index = math.random(#servers)
             local server = servers[index]
-            ngx.ctx.upstream = server  -- Store the selected server in the context
+            ngx.ctx.upstream = server
             balancer.set_current_peer(server)
         }
     }
@@ -140,6 +144,7 @@ http {
 }
 EOF
 
+# Validate OpenResty configuration and start
 sudo /usr/local/openresty/bin/openresty -t
 sudo /usr/local/openresty/bin/openresty -s reload
 echo "OpenResty configured successfully."
