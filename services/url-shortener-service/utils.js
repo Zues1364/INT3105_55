@@ -1,3 +1,4 @@
+import { create } from '../common/db.js';
 import { getNextCounter } from '../common/db.js';
 
 function encodeBase62(number) {
