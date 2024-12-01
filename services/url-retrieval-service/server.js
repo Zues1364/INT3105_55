@@ -1,6 +1,6 @@
 import express from 'express';
 import { getAsync, setAsync } from '../common/redisClient.js';
-import { findOrigin } from '../common/db.js';
+import { retrieveUrl } from './utils.js';
 import { successResponse, errorResponse } from '../common/responseHandler.js';
 
 const app = express();
@@ -15,7 +15,7 @@ app.get('/retrieve/:id', async (req, res) => {
         const cachedUrl = await getAsync(id);
         if (cachedUrl) return successResponse(res, { originalUrl: cachedUrl });
 
-        const url = await findOrigin(id);
+        const url = await retrieveUrl(id);
         if (!url) return errorResponse(res, 'URL not found', 404);
 
         await setAsync(id, url);
