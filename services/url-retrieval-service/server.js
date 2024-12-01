@@ -4,6 +4,10 @@ import { findOrigin } from '../common/db.js';
 import { successResponse, errorResponse } from '../common/responseHandler.js';
 
 const app = express();
+app.use(express.json());
+
+// Get the port from the environment variable, default to 4001 if not set
+const PORT = process.env.PORT || 4001;
 
 app.get('/retrieve/:id', async (req, res) => {
     try {
@@ -21,4 +25,4 @@ app.get('/retrieve/:id', async (req, res) => {
     }
 });
 
-app.listen(3002, () => console.log('URL Retrieval Service running on port 3002'));
+app.listen(PORT, () => console.log(`URL Retrieval Service running on port ${PORT}`));

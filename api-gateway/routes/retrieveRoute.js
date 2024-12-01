@@ -4,12 +4,17 @@ import { successResponse, errorResponse } from '../../services/common/responseHa
 
 const router = express.Router();
 
+// Proxy to NGINX for load balancing
 router.get('/:id', async (req, res) => {
     try {
-        const response = await axios.get(`http://localhost:3002/retrieve/${req.params.id}`);
-        successResponse(res, response.data);
+        const response = await axios.get(`http://localhost/retrieve/${req.params.id}`); // Send request to NGINX
+        successResponse(res, response.data); // Forward the successful response
     } catch (err) {
-        errorResponse(res, 'Failed to retrieve URL');
+        // Extract error details from axios response
+        const errorMessage = err.response
+            ? err.response.data.error || 'Unexpected error from backend'
+            : err.message;
+        errorResponse(res, `Failed to retrieve URL: ${errorMessage}`); // Return detailed error
     }
 });
 

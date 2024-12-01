@@ -4,12 +4,17 @@ import { successResponse, errorResponse } from '../../services/common/responseHa
 
 const router = express.Router();
 
+// Proxy to NGINX for load balancing
 router.post('/', async (req, res) => {
     try {
-        const response = await axios.post('http://localhost:3001/shorten', req.body);
-        successResponse(res, response.data);
+        const response = await axios.post('http://localhost/shorten', req.body); // Send request to NGINX
+        successResponse(res, response.data); // Forward the successful response
     } catch (err) {
-        errorResponse(res, 'Failed to shorten URL');
+        // Extract error details from axios response
+        const errorMessage = err.response
+            ? err.response.data.error || 'Unexpected error from backend'
+            : err.message;
+        errorResponse(res, `Failed to shorten URL: ${errorMessage}`); // Return detailed error
     }
 });
 

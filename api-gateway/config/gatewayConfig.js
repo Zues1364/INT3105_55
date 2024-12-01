@@ -6,8 +6,8 @@ const config = {
         message: 'Too many requests, please try again later.', // Message for rate limit exceed
     },
     services: {
-        urlShortener: process.env.URL_SHORTENER_SERVICE || 'http://localhost:3001', // URL Shortener Service
-        urlRetrieval: process.env.URL_RETRIEVAL_SERVICE || 'http://localhost:3002', // URL Retrieval Service
+        urlShortener: process.env.URL_SHORTENER_SERVICE || 'http://localhost/shorten', // NGINX load balancer for Shortener Service
+        urlRetrieval: process.env.URL_RETRIEVAL_SERVICE || 'http://localhost/retrieve', // NGINX load balancer for Retrieval Service
     },
 };
 

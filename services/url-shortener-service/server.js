@@ -6,6 +6,9 @@ import { successResponse, errorResponse } from '../common/responseHandler.js';
 const app = express();
 app.use(express.json());
 
+// Get the port from the environment variable, default to 3001 if not set
+const PORT = process.env.PORT || 3001;
+
 app.post('/shorten', async (req, res) => {
     try {
         const url = req.body.url;
@@ -19,4 +22,4 @@ app.post('/shorten', async (req, res) => {
     }
 });
 
-app.listen(3001, () => console.log('URL Shortener Service running on port 3001'));
+app.listen(PORT, () => console.log(`URL Shortener Service running on port ${PORT}`));
