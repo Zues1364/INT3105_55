@@ -10,18 +10,13 @@ fi
 
 echo "Checking system dependencies..."
 
-# Function to check if a process is running
-is_running() {
-    pgrep -x "$1" > /dev/null 2>&1
-}
-
-# Check and start Redis
-if is_running "redis-server"; then
+# Check if Redis is running
+if pgrep -x "redis-server" > /dev/null 2>&1; then
     echo "Redis is already running."
 else
     echo "Starting Redis..."
     redis-server --daemonize yes
-    if is_running "redis-server"; then
+    if pgrep -x "redis-server" > /dev/null 2>&1; then
         echo "Redis started successfully."
     else
         echo "Failed to start Redis."
@@ -29,13 +24,13 @@ else
     fi
 fi
 
-# Check and start MongoDB
-if is_running "mongod"; then
+# Check if MongoDB is running
+if pgrep -x "mongod" > /dev/null 2>&1; then
     echo "MongoDB is already running."
 else
     echo "Starting MongoDB..."
     mongod --dbpath /var/lib/mongodb --logpath /var/log/mongodb/mongod.log --fork
-    if is_running "mongod"; then
+    if pgrep -x "mongod" > /dev/null 2>&1; then
         echo "MongoDB started successfully."
     else
         echo "Failed to start MongoDB."
@@ -43,44 +38,41 @@ else
     fi
 fi
 
-# Check and start OpenResty
-if is_running "nginx"; then
-    echo "OpenResty (NGINX) is already running."
-else
-    echo "Starting OpenResty (NGINX)..."
-    sudo /usr/local/openresty/bin/openresty
-    if is_running "nginx"; then
-        echo "OpenResty (NGINX) started successfully."
-    else
-        echo "Failed to start OpenResty (NGINX)."
-        exit 1
-    fi
+# Check if OpenResty (NGINX) is running
+if is_running_nginx; then
+    echo "Stopping existing OpenResty (NGINX)..."
+    sudo /usr/local/openresty/bin/openresty -s stop
 fi
 
+echo "Starting OpenResty (NGINX)..."
+sudo /usr/local/openresty/bin/openresty
+if is_running_nginx; then
+    echo "OpenResty (NGINX) started successfully."
+else
+    echo "Failed to start OpenResty (NGINX)."
+    exit 1
+fi
+
+# Start Node.js services
 echo "Starting Node.js services..."
 
-# Define project directories
 PROJECT_DIR=~/url_shorten_project
 SHORTENER_SERVICE="$PROJECT_DIR/services/url-shortener-service"
 RETRIEVAL_SERVICE="$PROJECT_DIR/services/url-retrieval-service"
 API_GATEWAY="$PROJECT_DIR/api-gateway"
 
-# Start url-shortener-service instances
 PORT=3001 nohup node "$SHORTENER_SERVICE/server.js" > "$SHORTENER_SERVICE/logs/3001.log" 2>&1 &
 echo "Started url-shortener-service on port 3001."
 PORT=3002 nohup node "$SHORTENER_SERVICE/server.js" > "$SHORTENER_SERVICE/logs/3002.log" 2>&1 &
 echo "Started url-shortener-service on port 3002."
 
-# Start url-retrieval-service instances
 PORT=4001 nohup node "$RETRIEVAL_SERVICE/server.js" > "$RETRIEVAL_SERVICE/logs/4001.log" 2>&1 &
 echo "Started url-retrieval-service on port 4001."
 PORT=4002 nohup node "$RETRIEVAL_SERVICE/server.js" > "$RETRIEVAL_SERVICE/logs/4002.log" 2>&1 &
 echo "Started url-retrieval-service on port 4002."
 
-# Start api-gateway
 PORT=3000 nohup node "$API_GATEWAY/server.js" > "$API_GATEWAY/logs/gateway.log" 2>&1 &
 echo "Started api-gateway on port 3000."
 
-# Confirm all services are running
 echo "All services started successfully."
 ps aux | grep node
