@@ -8,7 +8,56 @@ if [ ! -f "$SETUP_FILE" ]; then
     exit 1
 fi
 
-echo "Starting services..."
+echo "Checking system dependencies..."
+
+# Function to check if a process is running
+is_running() {
+    pgrep -x "$1" > /dev/null 2>&1
+}
+
+# Check and start Redis
+if is_running "redis-server"; then
+    echo "Redis is already running."
+else
+    echo "Starting Redis..."
+    redis-server --daemonize yes
+    if is_running "redis-server"; then
+        echo "Redis started successfully."
+    else
+        echo "Failed to start Redis."
+        exit 1
+    fi
+fi
+
+# Check and start MongoDB
+if is_running "mongod"; then
+    echo "MongoDB is already running."
+else
+    echo "Starting MongoDB..."
+    mongod --dbpath /var/lib/mongodb --logpath /var/log/mongodb/mongod.log --fork
+    if is_running "mongod"; then
+        echo "MongoDB started successfully."
+    else
+        echo "Failed to start MongoDB."
+        exit 1
+    fi
+fi
+
+# Check and start OpenResty
+if is_running "nginx"; then
+    echo "OpenResty (NGINX) is already running."
+else
+    echo "Starting OpenResty (NGINX)..."
+    sudo /usr/local/openresty/bin/openresty
+    if is_running "nginx"; then
+        echo "OpenResty (NGINX) started successfully."
+    else
+        echo "Failed to start OpenResty (NGINX)."
+        exit 1
+    fi
+fi
+
+echo "Starting Node.js services..."
 
 # Define project directories
 PROJECT_DIR=~/url_shorten_project
