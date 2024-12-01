@@ -65,11 +65,29 @@ http {
     upstream url_shortener {
         server localhost:3001;
         server localhost:3002;
+
+        balancer_by_lua_block {
+            local balancer = require("ngx.balancer")
+            local servers = { "localhost:3001", "localhost:3002" }
+            local index = math.random(#servers)
+            local server = servers[index]
+            ngx.ctx.upstream = server  -- Store the selected server in the context
+            balancer.set_current_peer(server)
+        }
     }
 
     upstream url_retrieval {
         server localhost:4001;
         server localhost:4002;
+
+        balancer_by_lua_block {
+            local balancer = require("ngx.balancer")
+            local servers = { "localhost:4001", "localhost:4002" }
+            local index = math.random(#servers)
+            local server = servers[index]
+            ngx.ctx.upstream = server  -- Store the selected server in the context
+            balancer.set_current_peer(server)
+        }
     }
 
     server {
@@ -77,22 +95,24 @@ http {
 
         location /shorten {
             proxy_pass http://url_shortener;
-            header_filter_by_lua_block {
+            log_by_lua_block {
                 local count_dict = ngx.shared.request_count
-                local instance = ngx.var.upstream_addr
-                count_dict:incr(instance, 1, 0)
+                local instance = ngx.ctx.upstream
+                if instance then
+                    count_dict:incr(instance, 1, 0)
+                end
             }
-            error_log /var/log/nginx/upstream_debug.log debug;
         }
 
         location /retrieve {
             proxy_pass http://url_retrieval;
-            header_filter_by_lua_block {
+            log_by_lua_block {
                 local count_dict = ngx.shared.request_count
-                local instance = ngx.var.upstream_addr
-                count_dict:incr(instance, 1, 0)
+                local instance = ngx.ctx.upstream
+                if instance then
+                    count_dict:incr(instance, 1, 0)
+                end
             }
-            error_log /var/log/nginx/upstream_debug.log debug;
         }
 
         location /status {
