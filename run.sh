@@ -1,5 +1,10 @@
 #!/bin/bash
 
+is_running_nginx() {
+    ps aux | grep -E "/usr/local/openresty/nginx/sbin/nginx|openresty" | grep -v grep > /dev/null 2>&1
+}
+
+
 SETUP_FILE=~/.url_shorten_setup_complete
 
 # Check if the setup has been run
