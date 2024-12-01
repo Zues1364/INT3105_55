@@ -1,16 +1,18 @@
-import { findOrigin, create } from '../common/db.js';
+import { getNextCounter } from '../common/db.js';
 
-function makeID(length) {
+function encodeBase62(number) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
+    let encoded = '';
+    while (number > 0) {
+        encoded = characters[number % 62] + encoded;
+        number = Math.floor(number / 62);
+    }
+    return encoded || '0';
 }
 
 export async function shortUrl(url) {
-    while (true) {
-        const newID = makeID(5);
-        if (!await findOrigin(newID)) {
-            await create(newID, url);
-            return newID;
-        }
-    }
+    const counter = await getNextCounter();
+    const shortID = encodeBase62(counter);
+    await create(shortID, url); // Save the mapping to MongoDB and Redis
+    return shortID;
 }

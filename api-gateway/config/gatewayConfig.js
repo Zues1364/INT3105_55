@@ -14,6 +14,11 @@ const config = {
         urlShortener: process.env.URL_SHORTENER_SERVICE || 'http://localhost/shorten', // NGINX load balancer for Shortener Service
         urlRetrieval: process.env.URL_RETRIEVAL_SERVICE || 'http://localhost/retrieve', // NGINX load balancer for Retrieval Service
     },
+    mongodb: {
+        host: 'mongodb://localhost:27017',
+        database: 'url_shortener',
+        collection: 'main'
+    } 
 };
 
 export default config;

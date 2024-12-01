@@ -1,11 +1,45 @@
 import { MongoClient } from 'mongodb';
 import client from './redisClient.js'; // Redis client
+import config from '../../api-gateway/config/gatewayConfig.js';
 
 // MongoDB setup
-const mongoClient = new MongoClient('mongodb://localhost:27017');
+const mongoClient = new MongoClient(config.mongodb.host);
 await mongoClient.connect();
-const db = mongoClient.db('urlShortener');
-const collection = db.collection('urls');
+const db = mongoClient.db(config.mongodb.database);
+const collection = db.collection(config.mongodb.collection);
+
+// MongoDB counter collection
+const counterCollection = db.collection('counters');
+
+// Initialize counter in Redis if not already set
+async function initializeCounter() {
+    const redisCounter = await client.get('url_shortener_counter');
+    if (!redisCounter) {
+        const dbCounter = await counterCollection.findOne({ _id: 'url_shortener_counter' });
+        const initialCounter = dbCounter ? dbCounter.value : 1000; // Default start at 1000 if no value exists
+        await client.set('url_shortener_counter', initialCounter);
+        console.log(`Initialized Redis counter to: ${initialCounter}`);
+    }
+}
+
+// Get the next counter value
+export async function getNextCounter() {
+    const redisCounter = await client.incr('url_shortener_counter');
+    return redisCounter;
+}
+
+// Periodically sync Redis counter to MongoDB for persistence
+export async function syncRedisToDB() {
+    const redisCounter = await client.get('url_shortener_counter');
+    if (redisCounter) {
+        await counterCollection.updateOne(
+            { _id: 'url_shortener_counter' },
+            { $set: { value: parseInt(redisCounter, 10) } },
+            { upsert: true }
+        );
+        console.log(`Synced Redis counter (${redisCounter}) to MongoDB.`);
+    }
+}
 
 // Create a new URL mapping
 export async function create(shortID, originalUrl) {
@@ -32,3 +66,6 @@ export async function findOrigin(shortID) {
 
     return null; // URL not found
 }
+
+// Initialize counter at startup
+await initializeCounter();
