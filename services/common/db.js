@@ -52,33 +52,19 @@ export async function create(shortID, originalUrl) {
 
 // Retrieve the original URL
 export async function findOrigin(shortID) {
-    try {
-        // Log the input for debugging
-        console.log(`Looking for shortID: ${shortID}`);
-
-        // Check Redis cache
-        const cachedUrl = await client.get(shortID);
-        if (cachedUrl) {
-            console.log(`Cache hit for shortID: ${shortID}`);
-            return cachedUrl;
-        }
-        console.log(`Cache miss for shortID: ${shortID}`);
-
-        // Fetch from MongoDB if not in Redis
-        const result = await collection.findOne({ _id: shortID });
-        if (result) {
-            console.log(`Found in MongoDB: ${result.originalUrl}`);
-            // Cache the result in Redis
-            await client.set(shortID, result.originalUrl, { EX: 3600 }); // Cache for 1 hour
-            return result.originalUrl;
-        }
-
-        console.log(`ShortID not found in MongoDB: ${shortID}`);
-        return null; // URL not found
-    } catch (error) {
-        console.error(`Error in findOrigin: ${error.message}`);
-        throw new Error('Unexpected error from backend');
+    // Check Redis cache
+    const cachedUrl = await client.get(shortID);
+    if (cachedUrl) return cachedUrl;
+    
+    // Fetch from MongoDB if not in Redis
+    const result = await collection.findOne({ _id: shortID });
+    if (result) {
+        // Cache the result in Redis
+        await client.set(shortID, result.originalUrl, { EX: 3600 }); // Cache for 1 hour
+        return result.originalUrl;
     }
+
+    return null; // URL not found
 }
 
 // Initialize counter at startup

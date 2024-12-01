@@ -8,7 +8,7 @@ const router = express.Router();
 // Proxy to NGINX for load balancing
 router.get('/:id', async (req, res) => {
     try {
-        const response = await axios.get(`${config.services.urlRetrieval}${req.params.id}`); // Send request to NGINX
+        const response = await axios.get(`${config.services.urlRetrieval}/${req.params.id}`); // Send request to NGINX
         successResponse(res, response.data); // Forward the successful response
     } catch (err) {
         // Extract error details from axios response
