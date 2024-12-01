@@ -52,20 +52,56 @@ export async function create(shortID, originalUrl) {
 
 // Retrieve the original URL
 export async function findOrigin(shortID) {
-    // Check Redis cache
-    const cachedUrl = await client.get(shortID);
-    if (cachedUrl) return cachedUrl;
+    try {
+        // Log the input for debugging
+        console.log(`Looking for shortID: ${shortID}`);
 
-    // Fetch from MongoDB if not in Redis
-    const result = await collection.findOne({ _id: shortID });
-    if (result) {
-        // Cache the result in Redis
-        await client.set(shortID, result.originalUrl, { EX: 3600 }); // Cache for 1 hour
-        return result.originalUrl;
+        // Check Redis cache
+        const cachedUrl = await client.get(shortID);
+        if (cachedUrl) {
+            console.log(`Cache hit for shortID: ${shortID}`);
+            return cachedUrl;
+        }
+        console.log(`Cache miss for shortID: ${shortID}`);
+
+        // Fetch from MongoDB if not in Redis
+        const result = await collection.findOne({ _id: shortID });
+        if (result) {
+            console.log(`Found in MongoDB: ${result.originalUrl}`);
+            // Cache the result in Redis
+            await client.set(shortID, result.originalUrl, { EX: 3600 }); // Cache for 1 hour
+            return result.originalUrl;
+        }
+
+        console.log(`ShortID not found in MongoDB: ${shortID}`);
+        return null; // URL not found
+    } catch (error) {
+        console.error(`Error in findOrigin: ${error.message}`);
+        throw new Error('Unexpected error from backend');
     }
-
-    return null; // URL not found
 }
 
 // Initialize counter at startup
 await initializeCounter();
+
+// Save counter to MongoDB every 1 minutes
+setInterval(async () => {
+    try {
+        await syncRedisToDB();
+        console.log('Redis counter synced to MongoDB.');
+    } catch (error) {
+        console.error('Failed to sync Redis to MongoDB:', error);
+    }
+}, 5 * 60 * 1000); // Sync every 5 minutes
+
+process.on('SIGTERM', async () => {
+    console.log('Received SIGTERM. Syncing Redis counter to MongoDB...');
+    await syncRedisToDB();
+    process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+    console.log('Received SIGINT. Syncing Redis counter to MongoDB...');
+    await syncRedisToDB();
+    process.exit(0);
+});
