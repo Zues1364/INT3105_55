@@ -124,6 +124,11 @@ sudo /usr/local/openresty/bin/openresty -t
 sudo /usr/local/openresty/bin/openresty -s reload
 echo "OpenResty configured successfully."
 
+# Create logs directories
+sudo mkdir $API_GATEWAY/logs
+sudo mkdir $SHORTENER_SERVICE/logs
+sudo mkdir $RETRIEVAL_SERVICE/logs
+
 # Create a setup completion file
 touch "$SETUP_FILE"
 echo "Setup completed successfully."
