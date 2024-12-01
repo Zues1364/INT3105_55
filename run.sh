@@ -17,19 +17,19 @@ RETRIEVAL_SERVICE="$PROJECT_DIR/services/url-retrieval-service"
 API_GATEWAY="$PROJECT_DIR/api-gateway"
 
 # Start url-shortener-service instances
-nohup node "$SHORTENER_SERVICE/server.js" --PORT=3001 > "$SHORTENER_SERVICE/logs/3001.log" 2>&1 &
+PORT=3001 nohup node "$SHORTENER_SERVICE/server.js" > "$SHORTENER_SERVICE/logs/3001.log" 2>&1 &
 echo "Started url-shortener-service on port 3001."
-nohup node "$SHORTENER_SERVICE/server.js" --PORT=3002 > "$SHORTENER_SERVICE/logs/3002.log" 2>&1 &
+PORT=3002 nohup node "$SHORTENER_SERVICE/server.js" > "$SHORTENER_SERVICE/logs/3002.log" 2>&1 &
 echo "Started url-shortener-service on port 3002."
 
 # Start url-retrieval-service instances
-nohup node "$RETRIEVAL_SERVICE/server.js" --PORT=4001 > "$RETRIEVAL_SERVICE/logs/4001.log" 2>&1 &
+PORT=4001 nohup node "$RETRIEVAL_SERVICE/server.js" > "$RETRIEVAL_SERVICE/logs/4001.log" 2>&1 &
 echo "Started url-retrieval-service on port 4001."
-nohup node "$RETRIEVAL_SERVICE/server.js" --PORT=4002 > "$RETRIEVAL_SERVICE/logs/4002.log" 2>&1 &
+PORT=4002 nohup node "$RETRIEVAL_SERVICE/server.js" > "$RETRIEVAL_SERVICE/logs/4002.log" 2>&1 &
 echo "Started url-retrieval-service on port 4002."
 
 # Start api-gateway
-nohup node "$API_GATEWAY/server.js" --PORT=3000 > "$API_GATEWAY/logs/gateway.log" 2>&1 &
+PORT=3000 nohup node "$API_GATEWAY/server.js" > "$API_GATEWAY/logs/gateway.log" 2>&1 &
 echo "Started api-gateway on port 3000."
 
 # Confirm all services are running
