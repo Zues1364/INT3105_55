@@ -14,6 +14,8 @@ check_service() {
     fi
 }
 
+echo ""
+
 # Check Node.js services
 echo "Checking Node.js services..."
 declare -A SERVICES
@@ -27,6 +29,8 @@ for service in "${!SERVICES[@]}"; do
     check_service "${SERVICES[$service]}" "$service"
 done
 
+echo ""
+
 # Check Redis Server
 echo "Checking Redis server..."
 REDIS_STATUS=$(redis-cli ping 2>/dev/null)
@@ -36,6 +40,8 @@ else
     echo "Redis server is NOT running."
 fi
 
+echo ""
+
 # Check MongoDB Server
 echo "Checking MongoDB server..."
 MONGO_STATUS=$(mongosh --eval "db.runCommand({ connectionStatus: 1 }).ok" --quiet 2>/dev/null)
@@ -44,6 +50,8 @@ if [ "$MONGO_STATUS" == "1" ]; then
 else
     echo "MongoDB server is NOT running or connection failed."
 fi
+
+echo ""
 
 # Check OpenResty (NGINX)
 echo "Checking OpenResty (NGINX)..."
@@ -55,23 +63,13 @@ else
     echo "$NGINX_STATUS"
 fi
 
-# Check Logs for Node.js Services
-echo "Checking logs for Node.js services..."
-LOG_DIR=~/url_shorten_project
-LOG_FILES=("$LOG_DIR/services/url-shortener-service/logs/3001.log" \
-           "$LOG_DIR/services/url-shortener-service/logs/3002.log" \
-           "$LOG_DIR/services/url-retrieval-service/logs/4001.log" \
-           "$LOG_DIR/services/url-retrieval-service/logs/4002.log" \
-           "$LOG_DIR/api-gateway/logs/gateway.log")
+echo ""
 
-for log_file in "${LOG_FILES[@]}"; do
-    if [ -f "$log_file" ]; then
-        echo "Recent logs from $log_file:"
-        tail -n 5 "$log_file"
-    else
-        echo "Log file $log_file does not exist."
-    fi
-done
+# Check Service Requests
+echo "System requests:"
+curl localhost/status
+
+echo ""
 
 echo "System status check completed."
 
