@@ -124,11 +124,19 @@ sudo /usr/local/openresty/bin/openresty -t
 sudo /usr/local/openresty/bin/openresty -s reload
 echo "OpenResty configured successfully."
 
-# Create logs directories
-sudo mkdir $API_GATEWAY/logs
-sudo mkdir $SHORTENER_SERVICE/logs
-sudo mkdir $RETRIEVAL_SERVICE/logs
+# 6. Install npm dependencies
+echo "Installing npm dependencies..."
+npm install --prefix "$COMMON"
+npm install --prefix "$SHORTENER_SERVICE"
+npm install --prefix "$RETRIEVAL_SERVICE"
+npm install --prefix "$API_GATEWAY"
+echo "npm dependencies installed successfully."
 
-# Create a setup completion file
+# 7. Create logs directories
+sudo mkdir -p "$API_GATEWAY/logs"
+sudo mkdir -p "$SHORTENER_SERVICE/logs"
+sudo mkdir -p "$RETRIEVAL_SERVICE/logs"
+
+# 8. Create a setup completion file
 touch "$SETUP_FILE"
 echo "Setup completed successfully."
